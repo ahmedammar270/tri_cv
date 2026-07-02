@@ -1,0 +1,27 @@
+# Java / Spring Boot
+target/
+*.class
+
+# Angular / Node
+node_modules/
+frontend-tricv/node_modules/
+frontend-tricv/dist/
+frontend-tricv/.angular/
+
+# Fichiers sensibles
+.env
+application-secret.properties
+
+# Dossiers VS Code (contient la clé dans launch.json)
+.vscode/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
