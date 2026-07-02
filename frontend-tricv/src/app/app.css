@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #F7F8FA;
+  color: #1A1D29;
+}
+
+.topbar {
+  background-color: #14182B;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-mark {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: #8B92B0;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.topbar nav a {
+  color: #C7CCE0;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.topbar nav a:hover {
+  background-color: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+
+.topbar nav a.active {
+  background-color: rgba(45,91,255,0.2);
+  color: #7B9BFF;
+}
+
+.topbar nav a.nav-add {
+  background-color: #2D5BFF;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.topbar nav a.nav-add:hover {
+  background-color: #1E47E0;
+}
+
+main {
+  min-height: calc(100vh - 64px);
+}

@@ -1,0 +1,38 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Ajouter des CVs</h1>
+    <p>Sélectionne un ou plusieurs fichiers PDF — ils seront envoyés par lots automatiquement.</p>
+  </div>
+
+  <div class="card">
+    <div class="upload-zone" [class.has-file]="fichiersSelectionnes.length > 0">
+      <label class="file-drop">
+        <input type="file" accept=".pdf" multiple
+               (change)="onFichiersSelectionnes($event)" hidden />
+        <div class="upload-icon">📄</div>
+        <span class="upload-titre" *ngIf="fichiersSelectionnes.length === 0">
+          Cliquer pour choisir un ou plusieurs fichiers PDF
+        </span>
+        <span class="upload-titre" *ngIf="fichiersSelectionnes.length > 0">
+          {{ fichiersSelectionnes.length }} fichier(s) sélectionné(s)
+        </span>
+        <span class="upload-sous" *ngIf="fichiersSelectionnes.length === 0">
+          Sélection multiple possible
+        </span>
+        <span class="upload-sous" *ngIf="fichiersSelectionnes.length > 0">
+          ✅ Prêts à être ajoutés (envoi par lots de 50)
+        </span>
+      </label>
+    </div>
+
+    <button class="btn-primary btn-full" (click)="soumettre()" [disabled]="chargement">
+      {{ chargement ? progression : '+ Ajouter ' + fichiersSelectionnes.length + ' CV(s)' }}
+    </button>
+
+    <p class="message" *ngIf="message"
+       [class.success]="message.includes('✅')"
+       [class.error]="message.includes('❌') || message.includes('⚠️')">
+      {{ message }}
+    </p>
+  </div>
+</div>

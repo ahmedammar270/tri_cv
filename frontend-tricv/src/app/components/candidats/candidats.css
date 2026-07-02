@@ -1,0 +1,312 @@
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 16px;
+}
+
+.page-header-row h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.page-header-row p {
+  font-size: 14px;
+  color: #5B6178;
+  margin-bottom: 4px;
+}
+
+.lien-liste {
+  font-size: 13px;
+  color: #2D5BFF;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 6px;
+}
+
+.lien-liste:hover {
+  text-decoration: underline;
+}
+
+.btn-primary {
+  background-color: #2D5BFF;
+  color: #ffffff;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-ajouter {
+  padding: 12px 20px;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background-color: #1E47E0;
+}
+
+.recherche-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.recherche-box input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #DCDFE8;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.recherche-box input:focus {
+  outline: none;
+  border-color: #2D5BFF;
+}
+
+.btn-sm {
+  padding: 10px 18px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-ghost {
+  background-color: #ffffff;
+  color: #5B6178;
+  border: 1px solid #DCDFE8;
+}
+
+.btn-ghost:hover {
+  background-color: #F2F3F7;
+}
+
+.total {
+  font-size: 13px;
+  color: #5B6178;
+  margin-bottom: 16px;
+}
+
+.liste-candidats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.candidat-card-simple {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #E4E7EF;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.candidat-card-simple .candidat-infos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.candidat-card-simple h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.id-tag {
+  font-size: 12px;
+  color: #9AA0B5;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-voir {
+  padding: 6px 12px;
+  background-color: #EEF1FB;
+  color: #2D5BFF;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-voir:hover {
+  background-color: #D8DEFA;
+}
+
+.btn-delete {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: #F7F8FA;
+  color: #9AA0B5;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete:hover {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.vide {
+  text-align: center;
+  padding: 40px 0;
+  color: #9AA0B5;
+  font-size: 14px;
+}
+
+.modale-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modale {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.modale-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #E4E7EF;
+}
+
+.modale-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.btn-fermer {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #9AA0B5;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.btn-fermer:hover {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.modale-corps {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modale-corps pre {
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #3D4257;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.modale-confirm {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 380px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.confirm-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.modale-confirm h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.modale-confirm p {
+  font-size: 14px;
+  color: #5B6178;
+  margin-bottom: 24px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-annuler, .btn-confirmer {
+  flex: 1;
+  padding: 11px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-annuler {
+  background-color: #F2F3F7;
+  color: #3D4257;
+}
+
+.btn-annuler:hover {
+  background-color: #E4E7EF;
+}
+
+.btn-confirmer {
+  background-color: #DC2626;
+  color: #ffffff;
+}
+
+.btn-confirmer:hover {
+  background-color: #B91C1C;
+}

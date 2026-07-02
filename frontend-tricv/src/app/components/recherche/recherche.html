@@ -1,0 +1,312 @@
+
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">IA de recrutement · multi-métiers</div>
+    <h1>Trouvez le candidat le plus adapté en quelques secondes</h1>
+    <p>Analysez des profils dans tous les secteurs grâce à un moteur IA pensé pour la qualité, la rapidité et la lisibilité.</p>
+
+    <div class="hero-search">
+      <div class="hero-field hero-field-input">
+        <input
+          type="text"
+          [(ngModel)]="domaine"
+          placeholder="Ex: Comptable, Développeur Java, RH, Génie civil…"
+          (keyup.enter)="rechercher()"
+          class="hero-input"
+        />
+      </div>
+      <div class="hero-field hero-field-select">
+        <select [(ngModel)]="modeProfil" class="hero-select">
+          <option value="auto">🎯 Détection auto</option>
+          <option value="debutant">🎓 Jeune diplômé</option>
+          <option value="experimente">💼 Expérimenté</option>
+          <option value="stagiaire">🧑‍🎓 Stagiaire / PFE</option>
+        </select>
+      </div>
+      <button class="hero-btn" (click)="rechercher()" [disabled]="chargement">
+        {{ chargement ? 'Analyse…' : 'Rechercher' }}
+      </button>
+    </div>
+
+    <!-- Zone de compétences prioritaires -->
+    <div class="competences-prioritaires" *ngIf="domaine.trim()">
+      <div class="comps-header">
+        <label class="comps-label">Compétences prioritaires (optionnel)</label>
+        <button
+          type="button"
+          class="btn-suggerer"
+          (click)="chargerSuggestions()"
+          [disabled]="chargementSuggestions">
+          {{ chargementSuggestions ? 'Suggestion en cours…' : '✨ Suggérer des compétences' }}
+        </button>
+      </div>
+
+      <div class="suggestions-chargement" *ngIf="chargementSuggestions">
+        <span class="mini-spinner" aria-hidden="true"></span>
+        <span>L'IA cherche les compétences clés du domaine…</span>
+      </div>
+
+      <ng-container *ngIf="!chargementSuggestions && categoriesSuggerees.length > 0">
+        <p class="comps-hint">Cliquez sur une catégorie pour voir les compétences, puis cochez celles à prioriser (optionnel)</p>
+        <div class="comps-categories">
+          <div class="categorie-bloc" *ngFor="let cat of categoriesSuggerees">
+            <div class="categorie-ligne">
+              <button
+                type="button"
+                class="comp-tag comp-tag-categorie"
+                [class.selected]="isCompetenceSelectionnee(cat.nom)"
+                (click)="toggleCompetence(cat.nom)">
+                {{ cat.nom }}
+              </button>
+              <button
+                type="button"
+                class="btn-deplier"
+                *ngIf="cat.sousCompetences?.length"
+                [class.ouvert]="categorieOuverte === cat.nom"
+                (click)="ouvrirCategorie(cat.nom)"
+                [attr.aria-label]="'Voir les compétences de ' + cat.nom">
+                ▾
+              </button>
+            </div>
+
+            <div class="sous-competences" *ngIf="categorieOuverte === cat.nom">
+              <button
+                *ngFor="let sous of cat.sousCompetences"
+                type="button"
+                class="comp-tag comp-tag-sous"
+                [class.selected]="isCompetenceSelectionnee(sous)"
+                (click)="toggleCompetence(sous)">
+                {{ sous }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="liste-candidats" *ngIf="rechercheLancee">
+
+    <!-- Barre de statistiques + filtre + export -->
+    <div class="barre-outils" *ngIf="!chargement && evaluations.length > 0">
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-icon">◎</div>
+          <div class="stat-body">
+            <span class="stat-valeur">{{ nombreCandidats }}</span>
+            <span class="stat-label">Candidats visibles</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">↗</div>
+          <div class="stat-body">
+            <span class="stat-valeur">{{ scoreMoyen }}</span>
+            <span class="stat-label">Score moyen</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">★</div>
+          <div class="stat-body">
+            <span class="stat-valeur">{{ meilleurScore }}</span>
+            <span class="stat-label">Meilleur score</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controles">
+        <div class="filtre">
+          <label>Score min : <strong>{{ scoreMinimum }}</strong></label>
+          <input type="range" min="0" max="100" step="5" [(ngModel)]="scoreMinimum" />
+        </div>
+        <div class="filtre filtre-tri">
+          <label>Trier par</label>
+          <select [(ngModel)]="critereTri" class="select-tri">
+            <option value="score">Score global</option>
+            <option value="scoreAcademique">Score académique</option>
+            <option value="scoreExperience">Score expérience</option>
+            <option value="scorePfe">Score PFE</option>
+            <option value="nom">Nom</option>
+          </select>
+        </div>
+        <button class="btn-reset" (click)="reinitialiser()">↺ Réinitialiser</button>
+        <button class="btn-export" (click)="exporterCSV()">⬇️ Exporter CSV</button>
+      </div>
+
+    </div>
+
+    <div class="dashboard-grid" *ngIf="!chargement && evaluationsFiltrees.length > 0">
+      <div class="card-dashboard card-chart">
+        <div class="card-dashboard-head">
+          <h3>Top 5 candidats</h3>
+          <span class="qualite-badge" [ngClass]="classeQualiteVivier">{{ libelleQualiteVivier }}</span>
+        </div>
+        <div class="graph-list">
+          <div class="graph-row" *ngFor="let item of topCandidats">
+            <div class="graph-meta">
+              <span>{{ item.nom }}</span>
+              <strong>{{ item.score }}</strong>
+            </div>
+            <div class="graph-bar">
+              <div class="graph-fill" [style.width.%]="item.pourcentage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-dashboard card-insights">
+        <h3>Répartition des profils</h3>
+        <div class="profil-pills">
+          <span class="profil-pill" *ngFor="let item of repartitionProfils">
+            {{ item.count }} {{ item.label }}{{ item.count > 1 ? 's' : '' }}
+          </span>
+        </div>
+        <div class="qualite-inline">
+          <span class="qualite-label">Qualité du vivier</span>
+          <span class="qualite-badge large" [ngClass]="classeQualiteVivier">{{ libelleQualiteVivier }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="resultats-header" *ngIf="!chargement">
+      <p class="total">{{ nombreCandidats }} résultat(s) pour <strong>« {{ domaine }} »</strong></p>
+      <p class="info-filtre" *ngIf="candidatsMasquesParFiltre > 0">
+        {{ candidatsMasquesParFiltre }} candidat(s) masqué(s) par le filtre
+      </p>
+    </div>
+
+    <div class="chargement-msg" *ngIf="chargement">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>L'IA analyse les candidats…</p>
+      <div class="skeleton-list" aria-hidden="true">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card short"></div>
+      </div>
+    </div>
+
+    <div class="candidat-card" *ngFor="let e of evaluationsFiltrees; let i = index" [style.animation-delay]="(i * 80) + 'ms'">
+      <div class="rang">#{{ i + 1 }}</div>
+      <div class="score-badge" [ngClass]="classeScore(e.score)">{{ e.score }}</div>
+
+      <div class="candidat-infos">
+        <div class="candidat-top">
+          <h3>{{ e.candidat.nom }}</h3>
+          <span class="score-label" [ngClass]="classeScore(e.score)">
+            {{ e.score >= 80 ? 'Excellent' : e.score >= 60 ? 'Bon profil' : 'Profil faible' }}
+          </span>
+          <span class="badge-profil" *ngIf="e.profil">{{ libelleProfil(e.profil) }}</span>
+          <button class="btn-voir-cv" (click)="voirCV(e)">📄 Voir CV</button>
+        </div>
+
+        <p class="raison">{{ e.raison }}</p>
+
+        <!-- Detail des scores par critere -->
+        <div class="detail-scores" *ngIf="e.scoreTechnique != null">
+          <div class="critere">
+            <span class="critere-label">Technique</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scoreTechnique, 25)"
+                   [style.background]="couleurBarre(e.scoreTechnique, 25)"></div>
+            </div>
+            <span class="critere-val">{{ e.scoreTechnique }}/25</span>
+          </div>
+
+          <div class="critere">
+            <span class="critere-label">Expérience</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scoreExperience, 20)"
+                   [style.background]="couleurBarre(e.scoreExperience, 20)"></div>
+            </div>
+            <span class="critere-val">{{ e.scoreExperience }}/20</span>
+          </div>
+
+          <div class="critere">
+            <span class="critere-label">Académique</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scoreAcademique, 15)"
+                   [style.background]="couleurBarre(e.scoreAcademique, 15)"></div>
+            </div>
+            <span class="critere-val">{{ e.scoreAcademique }}/15</span>
+          </div>
+
+          <div class="critere">
+            <span class="critere-label">PFE & créativité</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scorePfe, 15)"
+                   [style.background]="couleurBarre(e.scorePfe, 15)"></div>
+            </div>
+            <span class="critere-val">{{ e.scorePfe }}/15</span>
+          </div>
+
+          <div class="critere">
+            <span class="critere-label">Langues</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scoreLangues, 8)"
+                   [style.background]="couleurBarre(e.scoreLangues, 8)"></div>
+            </div>
+            <span class="critere-val">{{ e.scoreLangues }}/8</span>
+          </div>
+
+          <div class="critere">
+            <span class="critere-label">Soft skills</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scoreSoftskills, 8)"
+                   [style.background]="couleurBarre(e.scoreSoftskills, 8)"></div>
+            </div>
+            <span class="critere-val">{{ e.scoreSoftskills }}/8</span>
+          </div>
+
+          <div class="critere">
+            <span class="critere-label">Certifs & stabilité</span>
+            <div class="critere-rail">
+              <div class="critere-fill"
+                   [style.width.%]="largeurBarre(e.scoreCertifs, 9)"
+                   [style.background]="couleurBarre(e.scoreCertifs, 9)"></div>
+            </div>
+            <span class="critere-val">{{ e.scoreCertifs }}/9</span>
+          </div>
+        </div>
+
+        <div class="points" *ngIf="e.pointsForts || e.pointsFaibles">
+          <div class="point-forts" *ngIf="e.pointsForts">
+            <span class="point-label">✅ Points forts</span>
+            <span>{{ e.pointsForts }}</span>
+          </div>
+          <div class="point-faibles" *ngIf="e.pointsFaibles">
+            <span class="point-label">⚠️ Points faibles</span>
+            <span>{{ e.pointsFaibles }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="vide" *ngIf="evaluationsFiltrees.length === 0 && !chargement">
+      Aucun candidat ne correspond {{ scoreMinimum > 0 ? 'à ce score minimum' : 'à ce domaine' }}.
+    </p>
+  </div>
+</div>
+
+<!-- Modale CV -->
+<div class="modale-overlay" *ngIf="candidatSelectionne" (click)="fermerCV()">
+  <div class="modale" (click)="$event.stopPropagation()">
+    <div class="modale-header">
+      <div>
+        <h2>CV — {{ candidatSelectionne.nom }}</h2>
+        <p class="modale-meta">Score global : {{ candidatSelectionne.score ?? '—' }} · Profil : {{ libelleProfil(candidatSelectionne.profil) }}</p>
+      </div>
+      <button class="btn-fermer" (click)="fermerCV()">✕</button>
+    </div>
+    <div class="modale-corps">
+      <pre>{{ candidatSelectionne.texteCV }}</pre>
+    </div>
+  </div>
+</div>

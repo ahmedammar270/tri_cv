@@ -1,0 +1,63 @@
+<div class="page">
+  <div class="page-header-row">
+    <div>
+      <h1>Liste des candidats</h1>
+      <p>Retrouve un candidat par nom ou ID pour le consulter ou le supprimer.</p>
+      <a routerLink="/" class="lien-liste">← Retour à l'accueil</a>
+    </div>
+    <a routerLink="/ajouter" class="btn-primary btn-ajouter">+ Ajouter un CV</a>
+  </div>
+
+  <div class="recherche-box">
+    <input
+      type="text"
+      [(ngModel)]="filtre"
+      placeholder="Rechercher par nom ou ID…"
+      (keyup)="appliquerFiltre()"
+    />
+    <button class="btn-ghost btn-sm" (click)="reinitialiserFiltre()">Réinitialiser</button>
+  </div>
+
+  <p class="total">{{ candidats.length }} candidat(s)</p>
+
+  <div class="liste-candidats">
+    <div class="candidat-card-simple" *ngFor="let c of candidats">
+      <div class="candidat-infos">
+        <span class="id-tag">#{{ c.id }}</span>
+        <h3>{{ c.nom }}</h3>
+      </div>
+      <div class="actions">
+        <button class="btn-voir" (click)="voirCV(c)">📄 Voir CV</button>
+        <button class="btn-delete" (click)="demanderSuppression(c)" title="Supprimer">✕</button>
+      </div>
+    </div>
+
+    <p class="vide" *ngIf="candidats.length === 0">Aucun candidat trouvé.</p>
+  </div>
+
+  <!-- Modale CV -->
+  <div class="modale-overlay" *ngIf="candidatSelectionne" (click)="fermerCV()">
+    <div class="modale" (click)="$event.stopPropagation()">
+      <div class="modale-header">
+        <h2>CV — {{ candidatSelectionne.nom }}</h2>
+        <button class="btn-fermer" (click)="fermerCV()">✕</button>
+      </div>
+      <div class="modale-corps">
+        <pre>{{ candidatSelectionne.texteCV }}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale confirmation suppression -->
+  <div class="modale-overlay" *ngIf="candidatASupprimer" (click)="annulerSuppression()">
+    <div class="modale-confirm" (click)="$event.stopPropagation()">
+      <div class="confirm-icon">⚠️</div>
+      <h3>Supprimer ce candidat ?</h3>
+      <p>{{ candidatASupprimer.nom }} sera définitivement supprimé de la base.</p>
+      <div class="confirm-actions">
+        <button class="btn-annuler" (click)="annulerSuppression()">Annuler</button>
+        <button class="btn-confirmer" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
