@@ -12,7 +12,8 @@ public class Candidat {
 
     private String nom;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String texteCV;
 
     public Long getId() { return id; }
