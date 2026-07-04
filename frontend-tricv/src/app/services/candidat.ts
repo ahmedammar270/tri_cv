@@ -7,8 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class CandidatService {
 
-  private apiUrl = 'http://localhost:8080/api';
-
+private apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8080/api'
+    : 'https://tri-cv.onrender.com/api';
   constructor(private http: HttpClient) {}
 
   getCandidats(): Observable<any[]> {
