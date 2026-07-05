@@ -8,8 +8,11 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   template: `
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark">TriCV</span>
-        <span class="brand-sub">Tri de candidats par IA</span>
+        <span class="brand-icon" aria-hidden="true">TC</span>
+        <span class="brand-text">
+          <span class="brand-name">Tri des CVs</span>
+          <span class="brand-sub">Recrutement augmenté par l'IA</span>
+        </span>
       </div>
       <nav>
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">🔍 Rechercher</a>

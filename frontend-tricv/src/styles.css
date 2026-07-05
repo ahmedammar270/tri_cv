@@ -2,6 +2,47 @@
 
 :root {
   color-scheme: light;
+
+  /* ===== Couleurs — identité "premium marine & doré" ===== */
+  --color-marine-900: #12233D;
+  --color-marine-800: #1A3050;
+  --color-gold: #C9A24B;
+  --color-gold-dark: #B38F3D;
+  --color-gold-bg: rgba(201, 162, 75, 0.12);
+  --color-bg: #F6F7F9;
+  --color-surface: #FFFFFF;
+  --color-border: #E3E7EE;
+  --color-border-tag: #D8DEE8;
+  --color-text: #12233D;
+  --color-text-secondary: #4A5A73;
+  --color-text-muted: #7E8DA3;
+  --color-tag-text: #3A4A63;
+  --color-success: #1E7B4D;
+  --color-warning: #B45309;
+  --color-danger: #B91C1C;
+
+  /* ===== Rayons ===== */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 20px;
+
+  /* ===== Ombres (toujours douces) ===== */
+  --shadow-sm: 0 2px 12px rgba(18, 35, 61, 0.05);
+  --shadow-md: 0 10px 28px rgba(18, 35, 61, 0.08);
+  --shadow-lg: 0 22px 54px rgba(18, 35, 61, 0.18);
+
+  /* ===== Espacements ===== */
+  --space-xs: 6px;
+  --space-sm: 12px;
+  --space-md: 20px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+
+  /* ===== Transitions ===== */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -15,8 +56,8 @@ html {
 body {
   margin: 0;
   font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(180deg, #f7f9fc 0%, #f2f5fb 100%);
-  color: #1A1D29;
+  background: var(--color-bg);
+  color: var(--color-text);
   line-height: 1.5;
 }
 
@@ -32,7 +73,6 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 3px solid rgba(45, 91, 255, 0.25);
+  outline: 3px solid rgba(201, 162, 75, 0.35);
   outline-offset: 2px;
 }
-

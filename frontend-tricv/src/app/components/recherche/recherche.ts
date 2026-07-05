@@ -19,6 +19,7 @@ export class RechercheComponent {
   categoriesSuggerees: { nom: string; sousCompetences: string[] }[] = [];
   categorieOuverte: string | null = null;
   chargementSuggestions: boolean = false;
+  filtresVisibles: boolean = false;
 
   evaluations: any[] = [];
   rechercheLancee: boolean = false;
@@ -226,6 +227,17 @@ export class RechercheComponent {
     return this.competencesPrioritaires.includes(comp);
   }
 
+  toggleFiltres(): void {
+    this.filtresVisibles = !this.filtresVisibles;
+  }
+
+  // Initiales (1 a 2 lettres) pour l'avatar d'un candidat, ex: "Jean Dupont" -> "JD"
+  initiales(nom: string | undefined): string {
+    if (!nom) return '?';
+    const lettres = nom.trim().split(/\s+/).slice(0, 2).map(mot => mot.charAt(0).toUpperCase());
+    return lettres.join('') || '?';
+  }
+
   // ===== EXPORT CSV =====
   exporterCSV() {
     const liste = this.evaluationsFiltrees;
@@ -312,6 +324,7 @@ export class RechercheComponent {
     this.categorieOuverte = null;
     this.competencesPrioritaires = [];
     this.chargementSuggestions = false;
+    this.filtresVisibles = false;
     this.annulerAnimationStats();
     this.compteurNombreCandidats = 0;
     this.compteurScoreMoyen = 0;
