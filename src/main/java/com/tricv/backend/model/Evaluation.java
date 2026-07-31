@@ -27,14 +27,25 @@ public class Evaluation {
     private String pointsFaibles;
 
     // --- Nouveaux champs : detail des scores par critere (7 criteres, total 100) ---
-    private Integer scoreTechnique;        // max 25
-    private Integer scoreExperience;       // max 20
-    private Integer scoreAcademique;       // max 15
-    private Integer scorePfe;              // max 15
-    private Integer scoreLangues;          // max 8
-    private Integer scoreSoftskills;       // max 8
-    private Integer scoreCertifs;          // max 9
+    private Integer scoreTechnique;
+    private Integer scoreExperience;
+    private Integer scoreAcademique;
+    private Integer scorePfe;
+    private Integer scoreLangues;
+    private Integer scoreSoftskills;
+    private Integer scoreCertifs;
     private String profil;
+
+    // Maximums par critere REELLEMENT utilises pour cette evaluation (varient selon le profil :
+    // cf. IAService.maxScoresPourProfil). Necessaires pour afficher correctement chaque sous-score
+    // (ex. "5/5" pour un stagiaire, pas "5/20") puisque les maximums ne sont plus fixes.
+    private Integer maxTechnique;
+    private Integer maxExperience;
+    private Integer maxAcademique;
+    private Integer maxPfe;
+    private Integer maxLangues;
+    private Integer maxSoftskills;
+    private Integer maxCertifs;
 
     // Compétences prioritaires utilisées lors de cette évaluation, normalisées
     // (minuscules, triées, jointes par des virgules ; chaîne vide si aucune).
@@ -90,4 +101,26 @@ public class Evaluation {
 
     public String getCompetencesPrioritaires() { return competencesPrioritaires; }
     public void setCompetencesPrioritaires(String competencesPrioritaires) { this.competencesPrioritaires = competencesPrioritaires; }
+
+    // --- Getters/setters des 7 maximums (dependants du profil) ---
+    public Integer getMaxTechnique() { return maxTechnique; }
+    public void setMaxTechnique(Integer maxTechnique) { this.maxTechnique = maxTechnique; }
+
+    public Integer getMaxExperience() { return maxExperience; }
+    public void setMaxExperience(Integer maxExperience) { this.maxExperience = maxExperience; }
+
+    public Integer getMaxAcademique() { return maxAcademique; }
+    public void setMaxAcademique(Integer maxAcademique) { this.maxAcademique = maxAcademique; }
+
+    public Integer getMaxPfe() { return maxPfe; }
+    public void setMaxPfe(Integer maxPfe) { this.maxPfe = maxPfe; }
+
+    public Integer getMaxLangues() { return maxLangues; }
+    public void setMaxLangues(Integer maxLangues) { this.maxLangues = maxLangues; }
+
+    public Integer getMaxSoftskills() { return maxSoftskills; }
+    public void setMaxSoftskills(Integer maxSoftskills) { this.maxSoftskills = maxSoftskills; }
+
+    public Integer getMaxCertifs() { return maxCertifs; }
+    public void setMaxCertifs(Integer maxCertifs) { this.maxCertifs = maxCertifs; }
 }

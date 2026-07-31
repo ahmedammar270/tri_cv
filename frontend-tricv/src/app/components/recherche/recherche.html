@@ -230,36 +230,17 @@
           </div>
         </div>
 
-        <!-- Sous-scores par critere -->
-        <div class="sous-scores" *ngIf="e.scoreTechnique != null">
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scoreTechnique, 25)"></span>
-            Technique {{ e.scoreTechnique }}/25
-          </span>
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scoreExperience, 20)"></span>
-            Expérience {{ e.scoreExperience }}/20
-          </span>
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scoreAcademique, 15)"></span>
-            Académique {{ e.scoreAcademique }}/15
-          </span>
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scorePfe, 15)"></span>
-            PFE {{ e.scorePfe }}/15
-          </span>
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scoreLangues, 8)"></span>
-            Langues {{ e.scoreLangues }}/8
-          </span>
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scoreSoftskills, 8)"></span>
-            Soft skills {{ e.scoreSoftskills }}/8
-          </span>
-          <span class="sous-score-badge">
-            <span class="dot" [style.background]="couleurBarre(e.scoreCertifs, 9)"></span>
-            Certifs {{ e.scoreCertifs }}/9
-          </span>
+        <!-- Sous-scores par critere : barres de progression (maximums variables selon le profil) -->
+        <div class="sous-scores-barres" *ngIf="e.scoreTechnique != null">
+          <ng-container *ngFor="let c of criteresScores">
+            <div class="critere-ligne" *ngIf="maxCritere(e, c.cle) > 0">
+              <span class="critere-nom">{{ c.label }}</span>
+              <div class="critere-barre">
+                <div class="critere-remplissage" [style.width.%]="pourcentageCritere(e, c.cle)"></div>
+              </div>
+              <span class="critere-pourcentage">{{ pourcentageCritere(e, c.cle) }}%</span>
+            </div>
+          </ng-container>
         </div>
 
         <p class="raison">{{ e.raison }}</p>

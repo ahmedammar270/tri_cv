@@ -330,17 +330,39 @@ export class RechercheComponent {
     return '—';
   }
 
-  couleurBarre(valeur: number, max: number): string {
-    if (valeur == null) return '#D3D1C7';
-    const pct = (valeur / max) * 100;
-    if (pct >= 70) return '#3B6D11';
-    if (pct >= 40) return '#BA7517';
-    return '#A32D2D';
+  // ===== SOUS-SCORES : barres de progression a maximums variables (selon le profil) =====
+  // Les 7 criteres avec leur libelle lisible ; "cle" sert a retrouver scoreXxx/maxXxx sur l'evaluation
+  // (ex. cle "technique" -> scoreTechnique / maxTechnique), evite de dupliquer le gabarit 7 fois au template.
+  readonly criteresScores: { cle: string; label: string }[] = [
+    { cle: 'technique', label: 'Technique' },
+    { cle: 'experience', label: 'Expérience' },
+    { cle: 'academique', label: 'Académique' },
+    { cle: 'pfe', label: 'PFE' },
+    { cle: 'langues', label: 'Langues' },
+    { cle: 'softskills', label: 'Soft skills' },
+    { cle: 'certifs', label: 'Certifications' }
+  ];
+
+  private capitaliser(mot: string): string {
+    return mot.charAt(0).toUpperCase() + mot.slice(1);
   }
 
-  largeurBarre(valeur: number, max: number): number {
-    if (valeur == null) return 0;
-    return (valeur / max) * 100;
+  valeurCritere(evaluation: any, cle: string): number {
+    return evaluation?.['score' + this.capitaliser(cle)] ?? 0;
+  }
+
+  maxCritere(evaluation: any, cle: string): number {
+    return evaluation?.['max' + this.capitaliser(cle)] ?? 0;
+  }
+
+  // Pourcentage arrondi (valeur / max * 100). Retourne 0 si max absent/0 (ancienne evaluation en
+  // cache sans maxScores) — le template masque alors la ligne plutot que d'afficher un pourcentage trompeur.
+  pourcentageCritere(evaluation: any, cle: string): number {
+    const max = this.maxCritere(evaluation, cle);
+    if (!max || max <= 0) {
+      return 0;
+    }
+    return Math.round((this.valeurCritere(evaluation, cle) / max) * 100);
   }
 
   reinitialiser() {

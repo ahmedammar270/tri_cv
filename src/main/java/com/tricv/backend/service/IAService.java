@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.retry.Retry;
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -92,6 +93,40 @@ public class IAService {
         return appelerGroq(prompt);
     }
 
+    // --- Maximums par critere, VARIABLES selon le profil (chaque colonne totalise 100) ---
+    // Utilise a la fois pour construire le prompt (grille + bornes JSON) ET, cote EvaluationService,
+    // pour clamper/stocker les sous-scores : une seule source de verite, calculee en Java (fiable,
+    // ne depend pas de l'IA pour renvoyer les bons maximums).
+    public Map<String, Integer> maxScoresPourProfil(String profil) {
+        Map<String, Integer> max = new LinkedHashMap<>();
+        if (profil != null && profil.equalsIgnoreCase("stagiaire")) {
+            max.put("technique", 20);
+            max.put("experience", 5);
+            max.put("academique", 25);
+            max.put("pfe", 27);
+            max.put("langues", 8);
+            max.put("softskills", 8);
+            max.put("certifs", 7);
+        } else if (profil != null && profil.equalsIgnoreCase("debutant")) {
+            max.put("technique", 22);
+            max.put("experience", 8);
+            max.put("academique", 22);
+            max.put("pfe", 24);
+            max.put("langues", 8);
+            max.put("softskills", 8);
+            max.put("certifs", 8);
+        } else { // "experimente" (defaut)
+            max.put("technique", 25);
+            max.put("experience", 28);
+            max.put("academique", 10);
+            max.put("pfe", 8);
+            max.put("langues", 8);
+            max.put("softskills", 8);
+            max.put("certifs", 13);
+        }
+        return max;
+    }
+
     public String analyserCV(String texteCV, String specialite, String modeProfil) {
         return analyserCV(texteCV, specialite, modeProfil, null);
     }
@@ -114,14 +149,24 @@ public class IAService {
                 + "Valorise : années pertinentes, qualité des entreprises (réputation, environnement), maîtrise techniques, soft skills, certifications et stabilité. ";
         }
 
+        // --- Maximums par critere pour ce profil (cf. maxScoresPourProfil) ---
+        Map<String, Integer> max = maxScoresPourProfil(profil);
+        int maxTechnique = max.get("technique");
+        int maxExperience = max.get("experience");
+        int maxAcademique = max.get("academique");
+        int maxPfe = max.get("pfe");
+        int maxLangues = max.get("langues");
+        int maxSoftskills = max.get("softskills");
+        int maxCertifs = max.get("certifs");
+
         // --- Instructions pour compétences prioritaires (si fournies) ---
         String instructionCompsPrio = "";
         if (competencesPrioritaires != null && !competencesPrioritaires.isEmpty()) {
             String listComps = String.join(", ", competencesPrioritaires);
             instructionCompsPrio = "COMPÉTENCES PRIORITAIRES : Le recruteur privilégie particulièrement ces compétences : " + listComps + ". "
-                + "Un candidat qui maîtrise fortement ces compétences prioritaires doit recevoir un score technique élevé (18-25). "
-                + "Un candidat qui maîtrise le reste du domaine mais PAS les compétences prioritaires doit recevoir un score technique plus faible (10-18). "
-                + "Un candidat qui maîtrise TOUT (prioritaire + le reste du domaine) est le meilleur (20-25). "
+                + "Un candidat qui maîtrise fortement ces compétences prioritaires doit recevoir un score technique élevé, proche du maximum de " + maxTechnique + " points. "
+                + "Un candidat qui maîtrise le reste du domaine mais PAS les compétences prioritaires doit recevoir un score technique nettement plus faible (environ 40 à 70% du maximum de " + maxTechnique + "). "
+                + "Un candidat qui maîtrise TOUT (prioritaire + le reste du domaine) est le meilleur et doit approcher le maximum de " + maxTechnique + ". "
                 + "Explique clairement dans la raison comment le candidat se positionne sur les compétences prioritaires. "
                 + "IMPORTANT : dans ta réponse, ne cite QUE les compétences prioritaires listées ci-dessus (" + listComps + ") comme étant \"prioritaires\" — "
                 + "ne mentionne aucune autre compétence sous ce terme, même si elle te semble pertinente pour le poste. ";
@@ -141,46 +186,46 @@ public class IAService {
             + instructionCompsPrio
 
             + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ "
-            + "GRILLE FIXE ET UNIQUE (7 CRITÈRES, TOTAL 100) : "
+            + "GRILLE ADAPTÉE AU PROFIL (7 CRITÈRES, TOTAL TOUJOURS 100) : "
             + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ "
 
-            + "1. COMPÉTENCES TECHNIQUES / MÉTIER (MAX 25 POINTS) : "
+            + "1. COMPÉTENCES TECHNIQUES / MÉTIER (MAX " + maxTechnique + " POINTS) : "
             + "   Maîtrise des outils, logiciels, méthodes, savoir-faire spécifiques du domaine/poste. "
             + "   Sois STRICT : ne donne le maximum que si le CV justifie clairement cette maîtrise. "
 
-            + "2. EXPÉRIENCE PROFESSIONNELLE (MAX 20 POINTS) : "
+            + "2. EXPÉRIENCE PROFESSIONNELLE (MAX " + maxExperience + " POINTS) : "
             + "   Années pertinentes + qualité des entreprises/environnements. "
             + "   Grande entreprise, multinationale, institution réputée = plus que structure inconnue. "
             + "   Débutant/stagiaire : évalue stages/projets avec la même logique de pertinence. "
             + "   Sois STRICT : expérience vague = peu de points. "
 
-            + "3. PARCOURS ACADÉMIQUE (MAX 15 POINTS) : "
+            + "3. PARCOURS ACADÉMIQUE (MAX " + maxAcademique + " POINTS) : "
             + "   HIÉRARCHIE STRICTE : Diplôme INGÉNIEUR > TECHNICIEN. École PUBLIQUE > PRIVÉE. "
             + "   Grandes écoles publiques tunisiennes (" + config.getEcolesPubliquesIngenieur() + ") = maximum. "
             + "   Écoles privées reconnues (" + config.getEcolesPriveesIngenieur() + ") = bien. "
             + "   Master public / licence appliquée = bon. Technicien ISET public = correct. "
             + "   Formation privée non reconnue = minimum. "
 
-            + "4. PROJETS ET PFE (MAX 15 POINTS) : "
+            + "4. PROJETS ET PFE (MAX " + maxPfe + " POINTS) : "
             + "   Évalue l'IDÉE, ORIGINALITÉ, CRÉATIVITÉ, ambition, pertinence au poste. "
             + "   ⚠️ SÉVÈRE : Un PFE/projet NON DÉTAILLÉ, peu créatif ou banal ≠ note maximale. "
-            + "   - PFE ambitieux, bien documenté, pertinent = 12-15. "
-            + "   - Projet solide mais classique = 8-11. "
-            + "   - Projet peu documenté ou standard = 4-7. "
-            + "   - Aucun projet ou minimal = 0-3. "
+            + "   - PFE ambitieux, bien documenté, pertinent = proche du maximum (" + maxPfe + "). "
+            + "   - Projet solide mais classique = environ 60 à 75% du maximum. "
+            + "   - Projet peu documenté ou standard = environ 25 à 50% du maximum. "
+            + "   - Aucun projet ou minimal = proche de 0. "
 
-            + "5. LANGUES (MAX 8 POINTS) : "
+            + "5. LANGUES (MAX " + maxLangues + " POINTS) : "
             + "   Nombre et niveau de maîtrise des langues (arabe, français, anglais, autres). "
             + "   Arabe + français + anglais courant = excellent. Seulement français/arabe = bon. "
             + "   Langue supplémentaire (allemand, espagnol, etc.) = bonus. "
             + "   Aucune langue documentée = très faible. "
 
-            + "6. SOFT SKILLS (MAX 8 POINTS) : "
+            + "6. SOFT SKILLS (MAX " + maxSoftskills + " POINTS) : "
             + "   Travail d'équipe, communication, leadership, autonomie, gestion de projet. "
             + "   Cherche des indices : présidence de clubs, animation de projets, références à la collaboration. "
             + "   Candidat solo, peu de preuves de travail d'équipe = faible. "
 
-            + "7. CERTIFICATIONS ET STABILITÉ (MAX 9 POINTS) : "
+            + "7. CERTIFICATIONS ET STABILITÉ (MAX " + maxCertifs + " POINTS) : "
             + "   Certifications professionnelles PERTINENTES + stabilité professionnelle. "
             + "   Stabilité = durée dans les postes, peu de changements fréquents. "
             + "   Certifications fortes (AWS, PMO, etc.) = bonus. "
@@ -190,12 +235,18 @@ public class IAService {
             + "RÈGLES DE CALCUL (IMPÉRATIF ABSOLU) : "
             + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ "
 
-            + "1. MAXIMUMS STRICTS : Aucun sous-score ne dépasse son max. "
-            + "   Technique ≤ 25 | Expérience ≤ 20 | Académique ≤ 15 | PFE ≤ 15 | Langues ≤ 8 | Softskills ≤ 8 | Certifs ≤ 9. "
+            + "1. MAXIMUMS STRICTS : Aucun sous-score ne dépasse son max POUR CE PROFIL. "
+            + "   Technique ≤ " + maxTechnique + " | Expérience ≤ " + maxExperience + " | Académique ≤ " + maxAcademique
+            + " | PFE ≤ " + maxPfe + " | Langues ≤ " + maxLangues + " | Softskills ≤ " + maxSoftskills + " | Certifs ≤ " + maxCertifs + ". "
 
-            + "2. SOMME = SCORE GLOBAL : technique + expérience + académique + pfe + langues + softskills + certifs = score global. "
-            + "   Exemple correct : 22 + 17 + 13 + 12 + 7 + 7 + 7 = 85 (score global). "
-            + "   Exemple INTERDIT : technique=26 (> 25), ou somme ≠ score. "
+            + "2. SOMME = SCORE GLOBAL : technique + expérience + académique + pfe + langues + softskills + certifs = score global (toujours sur 100). "
+            + "   Exemple correct pour ce profil : " + Math.round(maxTechnique * 0.8f) + " + " + Math.round(maxExperience * 0.8f) + " + "
+            + Math.round(maxAcademique * 0.8f) + " + " + Math.round(maxPfe * 0.8f) + " + " + Math.round(maxLangues * 0.8f) + " + "
+            + Math.round(maxSoftskills * 0.8f) + " + " + Math.round(maxCertifs * 0.8f) + " = "
+            + (Math.round(maxTechnique * 0.8f) + Math.round(maxExperience * 0.8f) + Math.round(maxAcademique * 0.8f)
+               + Math.round(maxPfe * 0.8f) + Math.round(maxLangues * 0.8f) + Math.round(maxSoftskills * 0.8f) + Math.round(maxCertifs * 0.8f))
+            + " (score global). "
+            + "   Exemple INTERDIT : technique > " + maxTechnique + ", ou somme ≠ score. "
 
             + "3. VÉRIFICATION AVANT RÉPONSE : "
             + "   Recalcule la somme. Si ≠ score global annoncé, corrige-la. "
@@ -215,13 +266,13 @@ public class IAService {
             + "\"pointsFaibles\": \"Liste des points faibles\", "
             + "\"profil\": \"" + profil + "\", "
             + "\"detailScores\": {"
-            + "\"technique\": [0-25], "
-            + "\"experience\": [0-20], "
-            + "\"academique\": [0-15], "
-            + "\"pfe\": [0-15], "
-            + "\"langues\": [0-8], "
-            + "\"softskills\": [0-8], "
-            + "\"certifs\": [0-9]}} "
+            + "\"technique\": [0-" + maxTechnique + "], "
+            + "\"experience\": [0-" + maxExperience + "], "
+            + "\"academique\": [0-" + maxAcademique + "], "
+            + "\"pfe\": [0-" + maxPfe + "], "
+            + "\"langues\": [0-" + maxLangues + "], "
+            + "\"softskills\": [0-" + maxSoftskills + "], "
+            + "\"certifs\": [0-" + maxCertifs + "]}} "
 
             + "DERNIER CHECK AVANT ENVOI : "
             + "1. Vérifie que chaque sous-score ≤ son max. "

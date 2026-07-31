@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -120,11 +121,23 @@ public class EvaluationService {
                                              List<String> competencesPrioritaires, String competencesNormalisees) {
         String reponseIA = iaService.analyserCV(candidat.getTexteCV(), domaine, profilResolu, competencesPrioritaires);
 
+        // Maximums par critere pour ce profil (meme source que celle utilisee pour construire le
+        // prompt, cf. IAService.maxScoresPourProfil) : sert a la fois a clamper les sous-scores
+        // renvoyes par l'IA et a les stocker pour un affichage correct cote frontend.
+        Map<String, Integer> max = iaService.maxScoresPourProfil(profilResolu);
+
         Evaluation evaluation = new Evaluation();
         evaluation.setCandidat(candidat);
         evaluation.setDomaine(domaine);
         evaluation.setProfil(profilResolu);
         evaluation.setCompetencesPrioritaires(competencesNormalisees);
+        evaluation.setMaxTechnique(max.get("technique"));
+        evaluation.setMaxExperience(max.get("experience"));
+        evaluation.setMaxAcademique(max.get("academique"));
+        evaluation.setMaxPfe(max.get("pfe"));
+        evaluation.setMaxLangues(max.get("langues"));
+        evaluation.setMaxSoftskills(max.get("softskills"));
+        evaluation.setMaxCertifs(max.get("certifs"));
 
         try {
             JsonNode root = objectMapper.readTree(reponseIA);
@@ -136,16 +149,16 @@ public class EvaluationService {
             evaluation.setProfil(profilResolu);
 
             JsonNode d = root.path("detailScores");
-            
-            // --- SECURITE : Clamper chaque sous-score (7 critères) à son maximum ---
-            int technique = Math.max(Math.min(d.path("technique").asInt(0), 25), 0);
-            int experience = Math.max(Math.min(d.path("experience").asInt(0), 20), 0);
-            int academique = Math.max(Math.min(d.path("academique").asInt(0), 15), 0);
-            int pfe = Math.max(Math.min(d.path("pfe").asInt(0), 15), 0);
-            int langues = Math.max(Math.min(d.path("langues").asInt(0), 8), 0);
-            int softskills = Math.max(Math.min(d.path("softskills").asInt(0), 8), 0);
-            int certifs = Math.max(Math.min(d.path("certifs").asInt(0), 9), 0);
-            
+
+            // --- SECURITE : Clamper chaque sous-score (7 critères) à son maximum, PROPRE AU PROFIL ---
+            int technique = Math.max(Math.min(d.path("technique").asInt(0), max.get("technique")), 0);
+            int experience = Math.max(Math.min(d.path("experience").asInt(0), max.get("experience")), 0);
+            int academique = Math.max(Math.min(d.path("academique").asInt(0), max.get("academique")), 0);
+            int pfe = Math.max(Math.min(d.path("pfe").asInt(0), max.get("pfe")), 0);
+            int langues = Math.max(Math.min(d.path("langues").asInt(0), max.get("langues")), 0);
+            int softskills = Math.max(Math.min(d.path("softskills").asInt(0), max.get("softskills")), 0);
+            int certifs = Math.max(Math.min(d.path("certifs").asInt(0), max.get("certifs")), 0);
+
             evaluation.setScoreTechnique(technique);
             evaluation.setScoreExperience(experience);
             evaluation.setScoreAcademique(academique);
@@ -153,7 +166,7 @@ public class EvaluationService {
             evaluation.setScoreLangues(langues);
             evaluation.setScoreSoftskills(softskills);
             evaluation.setScoreCertifs(certifs);
-            
+
             // Recalculer le score global comme somme des 7 sous-scores
             int scoreGlobal = technique + experience + academique + pfe + langues + softskills + certifs;
             evaluation.setScore(scoreGlobal);
