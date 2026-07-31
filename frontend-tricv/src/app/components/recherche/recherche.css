@@ -241,6 +241,13 @@
   gap: 8px;
 }
 
+/* Deux zones cote a cote, clairement separees : le tag (selection) et le chevron (accordeon) */
+.categorie-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .tag-categorie {
   padding: 8px 16px;
   background: #ffffff;
@@ -266,6 +273,36 @@
   box-shadow: 0 8px 18px rgba(201, 162, 75, 0.3);
 }
 
+.btn-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid var(--color-border-tag);
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btn-chevron:hover {
+  border-color: var(--color-marine-900);
+  color: var(--color-marine-900);
+}
+
+.btn-chevron.ouvert {
+  transform: rotate(180deg);
+  border-color: var(--color-marine-900);
+  color: var(--color-marine-900);
+  background: var(--color-bg);
+}
+
 .sous-competences-panel {
   width: 100%;
   margin-top: 4px;
@@ -283,6 +320,14 @@
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
+}
+
+.note-incluse {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-gold-dark);
+  margin-left: 6px;
 }
 
 .sous-competences-tags {
@@ -315,6 +360,16 @@
   background: var(--color-marine-900);
   border-color: var(--color-marine-900);
   color: #ffffff;
+}
+
+/* Categorie parente selectionnee entierement : la sous-competence est deja couverte, on l'attenue */
+.tag-sous.incluse {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.tag-sous.incluse:hover {
+  opacity: 0.85;
 }
 
 .check-icon {

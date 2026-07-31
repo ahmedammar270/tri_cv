@@ -75,14 +75,16 @@ public class IAService {
 
     // --- Suggestion de compétences selon le domaine ---
     public String suggererCompetences(String domaine) {
-        String prompt = "Tu es un expert en recrutement multi-secteurs. Pour le domaine ou métier suivant : " + domaine + ", propose une liste RICHE et STRUCTURÉE de compétences à prioriser chez un candidat. "
-            + "Fournis entre 5 et 7 grandes CATÉGORIES de compétences couvrant les principales facettes du métier. Pour CHAQUE catégorie, donne entre 4 et 6 SOUS-COMPÉTENCES précises et concrètes (technologies, outils, logiciels, méthodes, savoir-faire ou normes du secteur). "
-            + "Couvre différents aspects : les compétences techniques cœur de métier, les outils et logiciels utilisés, les méthodes de travail, et lorsque c'est pertinent les normes/réglementations ou les compétences transversales du domaine. "
-            + "Adapte impérativement les catégories et sous-compétences au métier réel demandé : elles doivent être très différentes selon qu'il s'agit d'informatique, de comptabilité, de marketing, de génie civil, de santé, etc. "
-            + "Exemples d'esprit attendu : "
-            + "- Développeur full stack -> catégories comme Frontend (Angular, React, Vue, HTML/CSS), Backend (Spring Boot, Node.js, Django, .NET), Base de données (MySQL, PostgreSQL, MongoDB), DevOps (Docker, Kubernetes, CI/CD, AWS), Tests (JUnit, Cypress). "
-            + "- Comptable -> catégories comme Comptabilité générale, Fiscalité, Audit, Logiciels comptables (Sage, SAP), Reporting et consolidation, Normes (IFRS). "
-            + "- Ingénieur génie civil -> catégories comme Calcul de structures, Béton armé, Logiciels (AutoCAD, Robot), Gestion de chantier, Normes (Eurocodes). "
+        String prompt = "Tu es un expert en recrutement. Pour le domaine ou métier suivant : " + domaine + ", propose les compétences les plus PERTINENTES et COURANTES à prioriser chez un candidat, celles qu'un recruteur recherche réellement en priorité pour ce poste. "
+            + "Fournis entre 5 et 7 grandes CATÉGORIES de compétences clairement liées à ce métier. Pour CHAQUE catégorie, donne entre 4 et 6 SOUS-COMPÉTENCES concrètes. "
+            + "RÈGLES IMPORTANTES : "
+            + "- Privilégie les compétences, technologies et outils les plus RÉPANDUS et DEMANDÉS sur le marché pour ce métier. Évite les technologies rares, de niche ou anecdotiques. "
+            + "- Les catégories doivent être directement pertinentes pour le domaine demandé. "
+            + "- Classe les compétences de la plus importante/courante à la moins courante. "
+            + "- Adapte tout au métier réel : les compétences d'un développeur Java, d'un comptable ou d'un ingénieur génie civil sont totalement différentes. "
+            + "Exemples de bon niveau de pertinence : "
+            + "- Développeur Java -> catégories comme 'Langage & Fondamentaux' (Java, POO, Collections, Exceptions), 'Frameworks' (Spring Boot, Spring MVC, Hibernate, Spring Security), 'Bases de données' (SQL, MySQL, PostgreSQL, JPA), 'Outils & Build' (Maven, Git, JUnit), 'API & Web' (API REST, JSON, Microservices). NE PAS proposer de frameworks rares comme Micronaut ou Quarkus en priorité. "
+            + "- Comptable -> 'Comptabilité générale', 'Fiscalité', 'Logiciels' (Sage, SAP, Excel), 'Audit & Contrôle', 'Reporting'. "
             + "Chaque libellé (catégorie et sous-compétence) doit être court (1 à 4 mots). "
             + "Réponds UNIQUEMENT en JSON, sans texte ni markdown autour, au format exact : "
             + "{\"categories\": [{\"nom\": \"...\", \"sousCompetences\": [\"...\", \"...\"]}]}";
@@ -120,7 +122,9 @@ public class IAService {
                 + "Un candidat qui maîtrise fortement ces compétences prioritaires doit recevoir un score technique élevé (18-25). "
                 + "Un candidat qui maîtrise le reste du domaine mais PAS les compétences prioritaires doit recevoir un score technique plus faible (10-18). "
                 + "Un candidat qui maîtrise TOUT (prioritaire + le reste du domaine) est le meilleur (20-25). "
-                + "Explique clairement dans la raison comment le candidat se positionne sur les compétences prioritaires. ";
+                + "Explique clairement dans la raison comment le candidat se positionne sur les compétences prioritaires. "
+                + "IMPORTANT : dans ta réponse, ne cite QUE les compétences prioritaires listées ci-dessus (" + listComps + ") comme étant \"prioritaires\" — "
+                + "ne mentionne aucune autre compétence sous ce terme, même si elle te semble pertinente pour le poste. ";
         }
 
         String prompt = "Tu es un expert RH senior capable d'évaluer des candidats dans tous les secteurs tunisiens (comptabilité, finance, marketing, RH, logistique, commerce, génie civil, santé, industrie, services, etc.). "

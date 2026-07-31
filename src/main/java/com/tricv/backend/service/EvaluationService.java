@@ -39,9 +39,15 @@ public class EvaluationService {
         if (competencesPrioritaires != null && !competencesPrioritaires.trim().isEmpty()) {
             String[] parts = competencesPrioritaires.split(",");
             for (String part : parts) {
-                comps.add(part.trim());
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    comps.add(trimmed);
+                }
             }
         }
+        // Forme normalisee (minuscules, triee, jointe par virgules) utilisee comme cle de cache :
+        // ainsi "Spring Boot, Hibernate" et "hibernate,spring boot" sont considerees identiques.
+        String compsNormalisees = normaliserCompetences(comps);
 
         List<Candidat> tousLesCandidats = candidatRepository.findAll();
 
@@ -61,22 +67,22 @@ public class EvaluationService {
             .limit(MAX_CANDIDATS_EVALUES)
             .collect(Collectors.toList());
 
-        // Étape 2 : vérifier le cache par candidat + domaine + profil résolu
-        // Note : competencesPrioritaires n'entre PAS dans la clé de cache (simplicité) ;
-        // deux recherches avec des priorités différentes peuvent donc réutiliser la même évaluation en cache.
+        // Étape 2 : vérifier le cache par candidat + domaine + profil résolu + compétences prioritaires (normalisées).
+        // Un changement de compétences prioritaires modifie donc la clé de cache et déclenche une réévaluation.
         List<Evaluation> dejaEvalues = new ArrayList<>();
         List<Evaluation> nouvelles = new ArrayList<>();
         for (Candidat candidat : preselectionnes) {
             String profilResolu = iaService.resoudreProfil(candidat.getTexteCV(), modeProfil);
             Optional<Evaluation> existante = evaluationRepository
-                    .findByCandidatIdAndDomaineIgnoreCaseAndProfilIgnoreCase(candidat.getId(), domaine, profilResolu);
+                    .findByCandidatIdAndDomaineIgnoreCaseAndProfilIgnoreCaseAndCompetencesPrioritaires(
+                            candidat.getId(), domaine, profilResolu, compsNormalisees);
 
             if (existante.isPresent()) {
                 dejaEvalues.add(existante.get());
                 continue;
             }
 
-            Evaluation e = evaluerEtSauvegarder(candidat, domaine, profilResolu, comps);
+            Evaluation e = evaluerEtSauvegarder(candidat, domaine, profilResolu, comps, compsNormalisees);
             if (e != null) {          // on ignore les echecs
                 nouvelles.add(e);
             }
@@ -97,13 +103,28 @@ public class EvaluationService {
         return tous;
     }
 
-    private Evaluation evaluerEtSauvegarder(Candidat candidat, String domaine, String profilResolu, List<String> competencesPrioritaires) {
+    // Normalise une liste de compétences pour en faire une clé de cache stable :
+    // minuscules + trim + tri alphabétique + jointure par virgules (liste vide -> "").
+    private String normaliserCompetences(List<String> competences) {
+        if (competences == null || competences.isEmpty()) {
+            return "";
+        }
+        return competences.stream()
+                .map(c -> c.trim().toLowerCase())
+                .filter(c -> !c.isEmpty())
+                .sorted()
+                .collect(Collectors.joining(","));
+    }
+
+    private Evaluation evaluerEtSauvegarder(Candidat candidat, String domaine, String profilResolu,
+                                             List<String> competencesPrioritaires, String competencesNormalisees) {
         String reponseIA = iaService.analyserCV(candidat.getTexteCV(), domaine, profilResolu, competencesPrioritaires);
 
         Evaluation evaluation = new Evaluation();
         evaluation.setCandidat(candidat);
         evaluation.setDomaine(domaine);
         evaluation.setProfil(profilResolu);
+        evaluation.setCompetencesPrioritaires(competencesNormalisees);
 
         try {
             JsonNode root = objectMapper.readTree(reponseIA);

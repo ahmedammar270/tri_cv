@@ -210,16 +210,47 @@ export class RechercheComponent {
     });
   }
 
+  // Accordeon uniquement : ouvre/replie les sous-competences d'une categorie, sans toucher aux priorites.
   ouvrirCategorie(nom: string): void {
     this.categorieOuverte = this.categorieOuverte === nom ? null : nom;
   }
 
-  toggleCompetence(comp: string): void {
+  // Selection uniquement : ajoute/retire une priorite (categorie entiere OU sous-competence precise).
+  // Exclusivite par categorie : la categorie et ses codes sous-competences ne sont jamais
+  // selectionnees en meme temps.
+  // - Selectionner la categorie ENTIERE retire toutes ses sous-competences deja cochees
+  //   (on repasse en mode "categorie globale").
+  // - Selectionner une SOUS-COMPETENCE retire la categorie parente si elle etait cochee
+  //   (on passe en mode "detaille" pour cette categorie).
+  // `categorie` est fourni par le template (celle du tag cliqué, qu'il s'agisse du nom de la
+  // categorie elle-meme ou d'une de ses sous-competences) pour retrouver la categorie parente
+  // sans avoir a la re-chercher dans categoriesSuggerees.
+  toggleCompetence(comp: string, categorie: { nom: string; sousCompetences: string[] }): void {
+    if (this.competencesPrioritaires.includes(comp)) {
+      this.retirerCompetence(comp);
+      return;
+    }
+
+    this.ajouterCompetence(comp);
+
+    const estCategorie = comp === categorie.nom;
+    if (estCategorie) {
+      categorie.sousCompetences.forEach(sous => this.retirerCompetence(sous));
+    } else {
+      this.retirerCompetence(categorie.nom);
+    }
+  }
+
+  private ajouterCompetence(comp: string): void {
+    if (!this.competencesPrioritaires.includes(comp)) {
+      this.competencesPrioritaires.push(comp);
+    }
+  }
+
+  private retirerCompetence(comp: string): void {
     const index = this.competencesPrioritaires.indexOf(comp);
     if (index >= 0) {
       this.competencesPrioritaires.splice(index, 1);
-    } else {
-      this.competencesPrioritaires.push(comp);
     }
   }
 

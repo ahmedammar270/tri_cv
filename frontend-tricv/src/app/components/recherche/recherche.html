@@ -50,27 +50,42 @@
       </div>
 
       <ng-container *ngIf="!chargementSuggestions && categoriesSuggerees.length > 0">
-        <p class="comps-hint">Cliquez sur une catégorie pour voir les compétences, puis cochez celles à prioriser</p>
+        <p class="comps-hint">Cochez une catégorie pour la prioriser entièrement, ou dépliez-la (▾) pour choisir des compétences précises</p>
 
         <div class="comps-categories">
           <div class="categorie-bloc" *ngFor="let cat of categoriesSuggerees">
-            <button
-              type="button"
-              class="tag-categorie"
-              [class.selected]="isCompetenceSelectionnee(cat.nom) || categorieOuverte === cat.nom"
-              (click)="toggleCompetence(cat.nom); ouvrirCategorie(cat.nom)">
-              {{ cat.nom }}
-            </button>
+            <div class="categorie-ligne">
+              <button
+                type="button"
+                class="tag-categorie"
+                [class.selected]="isCompetenceSelectionnee(cat.nom)"
+                (click)="toggleCompetence(cat.nom, cat)">
+                {{ cat.nom }}
+              </button>
+              <button
+                type="button"
+                class="btn-chevron"
+                [class.ouvert]="categorieOuverte === cat.nom"
+                (click)="ouvrirCategorie(cat.nom)"
+                [attr.aria-expanded]="categorieOuverte === cat.nom"
+                [attr.aria-label]="'Voir les sous-compétences de ' + cat.nom">
+                ▾
+              </button>
+            </div>
 
             <div class="sous-competences-panel" *ngIf="categorieOuverte === cat.nom">
-              <p class="sous-competences-titre">Sous-compétences · {{ cat.nom }}</p>
+              <p class="sous-competences-titre">
+                Sous-compétences · {{ cat.nom }}
+                <span class="note-incluse" *ngIf="isCompetenceSelectionnee(cat.nom)">(déjà incluses via la catégorie)</span>
+              </p>
               <div class="sous-competences-tags">
                 <button
                   *ngFor="let sous of cat.sousCompetences"
                   type="button"
                   class="tag-sous"
                   [class.selected]="isCompetenceSelectionnee(sous)"
-                  (click)="toggleCompetence(sous)">
+                  [class.incluse]="isCompetenceSelectionnee(cat.nom)"
+                  (click)="toggleCompetence(sous, cat)">
                   <span class="check-icon" *ngIf="isCompetenceSelectionnee(sous)" aria-hidden="true">✓</span>
                   {{ sous }}
                 </button>

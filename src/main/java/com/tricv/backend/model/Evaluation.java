@@ -36,6 +36,12 @@ public class Evaluation {
     private Integer scoreCertifs;          // max 9
     private String profil;
 
+    // Compétences prioritaires utilisées lors de cette évaluation, normalisées
+    // (minuscules, triées, jointes par des virgules ; chaîne vide si aucune).
+    // Fait partie de la clé de cache : cf. EvaluationService.rechercherParDomaine.
+    @Column(columnDefinition = "TEXT")
+    private String competencesPrioritaires;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -81,4 +87,7 @@ public class Evaluation {
 
     public String getProfil() { return profil; }
     public void setProfil(String profil) { this.profil = profil; }
+
+    public String getCompetencesPrioritaires() { return competencesPrioritaires; }
+    public void setCompetencesPrioritaires(String competencesPrioritaires) { this.competencesPrioritaires = competencesPrioritaires; }
 }
