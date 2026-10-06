@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { timeout } from 'rxjs';
 import { CandidatService } from '../../services/candidat';
 
 @Component({
@@ -18,7 +19,7 @@ export class AjouterComponent {
   chargement: boolean = false;
   progression: string = '';
 
-  private readonly TAILLE_LOT = 50;
+  private readonly TAILLE_LOT = 5;
 
   constructor(
     private candidatService: CandidatService,
@@ -55,7 +56,7 @@ export class AjouterComponent {
       this.cdr.detectChanges();
 
       try {
-        const resultat = await this.candidatService.ajouterCandidatsPdf(lots[i]).toPromise();
+        const resultat = await this.candidatService.ajouterCandidatsPdf(lots[i]).pipe(timeout(180000)).toPromise();
         totalAjoutes += (resultat?.length ?? 0);
       } catch (err) {
         console.error(`Erreur lot ${i + 1}:`, err);
